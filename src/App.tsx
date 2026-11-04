@@ -9,7 +9,6 @@ const occasions = ["عروسی", "مهمانی شب", "کوکتل", "شام رس
 export default function App() {
   const [occasion, setOccasion] = useState<string | null>(null);
 
-  // Cursor-following light (see body::after in index.css)
   useEffect(() => {
     const move = (e: PointerEvent) => {
       const root = document.documentElement.style;
@@ -23,7 +22,6 @@ export default function App() {
   return (
     <main>
       <Header />
-
       <section className="hero">
         <div>
           <span className="mono rise">NOIRÉ — COLLECTION 01</span>
@@ -60,7 +58,6 @@ export default function App() {
           <span className="mono">SCROLL ↓</span>
         </div>
       </section>
-
       <section className="intro">
         <p>
           لباس فقط یک انتخاب نیست؛
@@ -69,7 +66,79 @@ export default function App() {
         </p>
         <span className="mono">NOIRÉ / EST. 2026</span>
       </section>
+      {/* Occasion Categories */}
+      <section className="occasions" id="occasions">
+        <div className="occasions-heading">
+          <span className="mono">DRESS FOR THE MOMENT</span>
 
+          <h2>
+            هر لحظه،
+            <br />
+            <em>انتخابی متفاوت.</em>
+          </h2>
+
+          <p>
+            برای لحظه‌هایی که قرار است
+            <br />
+            به خاطره تبدیل شوند.
+          </p>
+        </div>
+
+        <div className="occasion-grid">
+          <a
+            href="/shop?occasion=wedding"
+            className="occasion-card occasion-wedding"
+          >
+            <img
+              src="images/dress-1.jpg"
+              alt="استایل مراسم و عروسی"
+              loading="lazy"
+            />
+
+            <div className="occasion-content">
+              <span className="mono">01 / SPECIAL CEREMONIES</span>
+              <h3>مراسم و عروسی</h3>
+              <span className="occasion-link">
+                مشاهده انتخاب‌ها <ArrowLeft size={16} />
+              </span>
+            </div>
+          </a>
+
+          <a
+            href="/shop?occasion=party"
+            className="occasion-card occasion-party"
+          >
+            <img
+              src="images/dress-2.jpg"
+              alt="استایل مهمانی شبانه"
+              loading="lazy"
+            />
+
+            <div className="occasion-content">
+              <span className="mono">02 / EVENING MOMENTS</span>
+              <h3>مهمانی شبانه</h3>
+              <span className="occasion-link">
+                مشاهده انتخاب‌ها <ArrowLeft size={16} />
+              </span>
+            </div>
+          </a>
+
+          <a
+            href="/shop?occasion=formal"
+            className="occasion-card occasion-formal"
+          >
+            <img src="images/dress-5.jpg" alt="استایل رسمی" loading="lazy" />
+
+            <div className="occasion-content">
+              <span className="mono">03 / TIMELESS ELEGANCE</span>
+              <h3>استایل رسمی</h3>
+              <span className="occasion-link">
+                مشاهده انتخاب‌ها <ArrowLeft size={16} />
+              </span>
+            </div>
+          </a>
+        </div>
+      </section>
       <section className="collection" id="collection">
         <div className="section-heading">
           <div>
@@ -90,7 +159,40 @@ export default function App() {
           ))}
         </div>
       </section>
+      {/* Brand Story */}
+      <section className="brand-story" id="about">
+        <div className="brand-story-visual">
+          <img
+            src="images/dress-6.jpg"
+            alt="NOIRÉ fashion editorial"
+            loading="lazy"
+          />
 
+          <span className="brand-image-caption mono">THE NOIRÉ PHILOSOPHY</span>
+        </div>
+
+        <div className="brand-story-content">
+          <span className="mono">BEYOND THE ORDINARY</span>
+
+          <h2>
+            زیبایی در جزئیات است؛
+            <br />
+            <em>نه در اغراق.</em>
+          </h2>
+
+          <p>
+            در NOIRÉ، هر انتخاب با نگاهی به ظرافت، کیفیت و شخصیت منحصربه‌فرد شما
+            شکل می‌گیرد. ما به زیبایی‌هایی باور داریم که نیازی به توضیح ندارند.
+          </p>
+
+          <a href="/about" className="hero-link">
+            داستان NOIRÉ
+            <ArrowLeft size={16} />
+          </a>
+
+          <span className="brand-story-signature">NOIRÉ®</span>
+        </div>
+      </section>
       <section className="stylist" id="stylist">
         <p className="mono">NOIRÉ AI STYLIST</p>
         <h2>
@@ -129,16 +231,22 @@ export default function App() {
         </button>
       </section>
 
-      <section className="newsletter">
-        <p className="mono">A NOTE FROM NOIRÉ</p>
+      {/* Newsletter */}
+      <section className="newsletter" id="newsletter">
+        <span className="mono">A NOTE FROM NOIRÉ</span>
+
         <h2>
-          برای خبرهای <em>خاص</em>، همراه ما باش.
+          گاهی یک خبر،
+          <br />
+          <em>شروع یک انتخاب است.</em>
         </h2>
-        <p>کالکشن‌های تازه و انتخاب‌های ویژه، قبل از همه.</p>
+
+        <p>از کالکشن‌های تازه و انتخاب‌های ویژه زودتر باخبر شو.</p>
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            alert("ثبت ایمیل در نسخه نمایشی است.");
+            alert("خبرنامه در نسخه بعدی فعال خواهد شد.");
           }}
         >
           <input
@@ -147,19 +255,58 @@ export default function App() {
             aria-label="آدرس ایمیل"
             required
           />
+
           <button type="submit">
             عضویت
             <ArrowLeft size={15} />
           </button>
         </form>
-      </section>
 
+        <span className="newsletter-note">
+          NO SPAM. ONLY THINGS WORTH YOUR TIME.
+        </span>
+      </section>
+      {/* Footer */}
       <footer className="footer">
-        <a className="footer-logo" href="#" aria-label="NOIRÉ">
-          NOIRÉ
-        </a>
+        <div className="footer-main">
+          <div className="footer-brand">
+            <a className="footer-logo" href="#">
+              NOIRÉ<span>®</span>
+            </a>
+
+            <p>
+              ظرافت، فراتر از زمان.
+              <br />
+              انتخابی برای لحظه‌های خاص.
+            </p>
+          </div>
+
+          <div className="footer-column">
+            <h3>دسترسی سریع</h3>
+            <a href="/shop">فروشگاه</a>
+            <a href="/about">درباره ما</a>
+            <a href="/#stylist">استایلیست هوشمند</a>
+          </div>
+
+          <div className="footer-column">
+            <h3>راهنمای خرید</h3>
+            <a href="/faq">سؤالات متداول</a>
+            <a href="/shipping">ارسال و تحویل</a>
+            <a href="/returns">شرایط بازگشت</a>
+          </div>
+
+          <div className="footer-column">
+            <h3>ارتباط با ما</h3>
+            <a href="/contact">تماس با ما</a>
+            <a href="https://instagram.com/" target="_blank" rel="noreferrer">
+              اینستاگرام
+            </a>
+          </div>
+        </div>
+
         <div className="footer-bottom">
-          <span className="mono">© 2026 NOIRÉ. All rights reserved.</span>
+          <span className="mono">© 2026 NOIRÉ. ALL RIGHTS RESERVED.</span>
+
           <span>ساخته‌شده برای لحظه‌های خاص</span>
         </div>
       </footer>

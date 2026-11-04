@@ -546,3 +546,379 @@ body::after {
     scroll-behavior: auto;
   }
 }
+
+/* Occasions */
+
+.occasions {
+  padding: 120px 6vw;
+}
+
+.occasions-heading {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  margin-bottom: 55px;
+}
+
+.occasions-heading .mono {
+  grid-column: 1 / -1;
+  margin-bottom: 24px;
+}
+
+.occasions-heading h2 {
+  font-size: clamp(38px, 5vw, 68px);
+  font-weight: 200;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.occasions-heading p {
+  color: var(--mute);
+  font-size: 12px;
+  line-height: 2.4;
+  margin: 0;
+  justify-self: end;
+}
+
+.occasion-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.occasion-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #191614;
+}
+
+.occasion-wedding {
+  grid-row: span 2;
+}
+
+.occasion-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  object-fit: cover;
+  filter: grayscale(0.35) brightness(0.72);
+  transition:
+    transform 0.8s ease,
+    filter 0.8s ease;
+}
+
+.occasion-wedding img {
+  min-height: 680px;
+  object-position: center 30%;
+}
+
+.occasion-party img,
+.occasion-formal img {
+  min-height: 326px;
+}
+
+.occasion-card:hover img {
+  transform: scale(1.035);
+  filter: grayscale(0.1) brightness(0.8);
+}
+
+.occasion-content {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 30px;
+  background: linear-gradient(
+    to top,
+    rgba(12, 11, 10, 0.88),
+    rgba(12, 11, 10, 0.15),
+    transparent
+  );
+}
+
+.occasion-content .mono {
+  font-size: 9px;
+}
+
+.occasion-content h3 {
+  font-size: 25px;
+  font-weight: 300;
+  margin: 12px 0;
+}
+
+.occasion-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold);
+  font-size: 11px;
+  transition: gap 0.3s ease;
+}
+
+.occasion-card:hover .occasion-link {
+  gap: 17px;
+}
+
+@media (max-width: 900px) {
+  .occasions {
+    padding: 85px 6vw;
+  }
+
+  .occasion-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .occasion-wedding {
+    grid-row: auto;
+  }
+
+  .occasion-wedding img,
+  .occasion-party img,
+  .occasion-formal img {
+    min-height: 360px;
+  }
+
+  .occasion-content {
+    padding: 20px;
+  }
+
+  .occasion-content h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .occasions-heading {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .occasions-heading p {
+    justify-self: start;
+  }
+
+  .occasion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .occasion-wedding img,
+  .occasion-party img,
+  .occasion-formal img {
+    min-height: 430px;
+  }
+}
+
+/* Brand Story */
+
+.brand-story {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 9%;
+  padding: 130px 10%;
+}
+
+.brand-story-visual {
+  position: relative;
+  height: 650px;
+  overflow: hidden;
+}
+
+.brand-story-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: grayscale(0.5) brightness(0.8);
+  transition: transform 1s ease;
+}
+
+.brand-story-visual:hover img {
+  transform: scale(1.03);
+}
+
+.brand-image-caption {
+  position: absolute;
+  bottom: 22px;
+  left: 22px;
+  direction: ltr;
+}
+
+.brand-story-content {
+  max-width: 480px;
+}
+
+.brand-story-content h2 {
+  font-size: clamp(36px, 4.5vw, 62px);
+  font-weight: 200;
+  line-height: 1.8;
+  margin: 35px 0 25px;
+}
+
+.brand-story-content > p {
+  color: var(--mute);
+  font-size: 13px;
+  line-height: 2.7;
+  margin-bottom: 35px;
+}
+
+.brand-story-signature {
+  display: block;
+  margin-top: 65px;
+  font:
+    28px "Playfair Display",
+    serif;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  direction: ltr;
+}
+
+@media (max-width: 900px) {
+  .brand-story {
+    grid-template-columns: 1fr;
+    gap: 45px;
+    padding: 90px 6vw;
+  }
+
+  .brand-story-visual {
+    height: 520px;
+  }
+
+  .brand-story-content {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-story-visual {
+    height: 430px;
+  }
+
+  .brand-story-content h2 {
+    font-size: 36px;
+  }
+}
+
+/* Newsletter refinements */
+
+.newsletter {
+  padding: 130px 6vw 110px;
+}
+
+.newsletter h2 {
+  margin-top: 25px;
+}
+
+.newsletter-note {
+  display: block;
+  margin-top: 22px;
+  font:
+    9px "DM Sans",
+    sans-serif;
+  letter-spacing: 0.15em;
+  color: var(--mute);
+  direction: ltr;
+}
+
+/* Footer */
+
+.footer {
+  padding: 70px 6vw 25px;
+  background: #100e0c;
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 1.6fr repeat(3, 1fr);
+  gap: 45px;
+  padding-bottom: 65px;
+}
+
+.footer-logo {
+  display: inline-block;
+  font:
+    32px "Playfair Display",
+    serif;
+  letter-spacing: 0.18em;
+  direction: ltr;
+  color: var(--ink);
+}
+
+.footer-logo span {
+  font:
+    9px "DM Sans",
+    sans-serif;
+  vertical-align: top;
+}
+
+.footer-brand p {
+  color: var(--mute);
+  font-size: 11px;
+  line-height: 2.5;
+  margin-top: 22px;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 17px;
+}
+
+.footer-column h3 {
+  font-size: 12px;
+  font-weight: 400;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.footer-column a {
+  font-size: 11px;
+  color: var(--mute);
+  transition: color 0.2s;
+}
+
+.footer-column a:hover {
+  color: var(--gold);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--mute);
+  font-size: 10px;
+}
+
+@media (max-width: 750px) {
+  .footer-main {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 25px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 450px) {
+  .footer-main {
+    grid-template-columns: 1fr 1fr;
+    gap: 35px 15px;
+  }
+
+  .footer-column h3 {
+    font-size: 11px;
+  }
+}

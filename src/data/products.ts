@@ -16,7 +16,7 @@ export const products: Product[] = [
     category: "ساتن",
     price: 6200000,
     image:
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=900&q=85",
+      "images/dress-4.jpg",
   },
   {
     id: "dress-003",
@@ -24,7 +24,7 @@ export const products: Product[] = [
     category: "لباس شب",
     price: 5700000,
     image:
-      "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=900&q=85",
+      "images/dress-1.jpg",
     badge: "پرفروش",
   },
   {
@@ -33,7 +33,7 @@ export const products: Product[] = [
     category: "پیراهن بلند",
     price: 7100000,
     image:
-      "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=900&q=85",
+      "images/dress-3.jpg",
   },
 ];
 
