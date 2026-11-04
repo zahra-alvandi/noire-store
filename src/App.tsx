@@ -1,64 +1,83 @@
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import Header from "./components/Header";
 import ProductCard from "./components/ProductCard";
 import { products } from "./data/products";
 
+const occasions = ["عروسی", "مهمانی شب", "کوکتل", "شام رسمی"];
+
 export default function App() {
+  const [occasion, setOccasion] = useState<string | null>(null);
+
+  // Cursor-following light (see body::after in index.css)
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      const root = document.documentElement.style;
+      root.setProperty("--x", `${e.clientX}px`);
+      root.setProperty("--y", `${e.clientY}px`);
+    };
+    window.addEventListener("pointermove", move);
+    return () => window.removeEventListener("pointermove", move);
+  }, []);
+
   return (
     <main>
       <Header />
 
-      {/* Hero */}
-      <section className="editorial-hero">
-        <div className="hero-copy">
-          <span className="hero-kicker">NOIRÉ — COLLECTION 01</span>
-
-          <h1>
+      <section className="hero">
+        <div>
+          <span className="mono rise">NOIRÉ — COLLECTION 01</span>
+          <h1 className="rise" style={{ "--d": 1 } as React.CSSProperties}>
             زیبایی،
             <br />
             در <em>سادگی</em> است.
           </h1>
-
-          <p>
+          <p className="rise" style={{ "--d": 2 } as React.CSSProperties}>
             انتخابی برای زنانی که نیازی به جلب توجه ندارند؛ حضورشان کافی‌ست.
           </p>
-
-          <a href="#collection" className="hero-link">
+          <a
+            href="#collection"
+            className="hero-link rise"
+            style={{ "--d": 3 } as React.CSSProperties}
+          >
             کشف کالکشن
             <ArrowLeft size={16} />
           </a>
         </div>
 
-        <div className="hero-visual">
-          <img
-            src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1400&q=90"
-            alt="NOIRÉ eveningwear collection"
-          />
+        <div className="stage rise" style={{ "--d": 2 } as React.CSSProperties}>
+          <div className="moon" />
+          <div className="arch">
+            <img
+              src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1400&q=90"
+              alt="NOIRÉ eveningwear collection"
+            />
+          </div>
+        </div>
 
-          <span className="image-caption">THE ART OF DRESSING</span>
+        <div className="hero-note">
+          <span className="mono">ELEGANCE AFTER DARK</span>
+          <span className="mono">SCROLL ↓</span>
         </div>
       </section>
 
-      {/* Brand introduction */}
-      <section className="intro-strip">
+      <section className="intro">
         <p>
           لباس فقط یک انتخاب نیست؛
-          <strong> حسی‌ست که با خودت حمل می‌کنی.</strong>
+          <br />
+          <strong>حسی‌ست که با خودت حمل می‌کنی.</strong>
         </p>
-
-        <span>NOIRÉ / EST. 2026</span>
+        <span className="mono">NOIRÉ / EST. 2026</span>
       </section>
 
-      {/* Product collection */}
-      <section className="collection section-shell" id="collection">
+      <section className="collection" id="collection">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">CURATED FOR YOUR MOMENTS</p>
+            <p className="mono">CURATED FOR YOUR MOMENTS</p>
             <h2>
               انتخاب‌هایی <em>ماندگار</em>
             </h2>
           </div>
-
           <a className="text-link" href="#new">
             مشاهده محصولات
             <ArrowLeft size={16} />
@@ -66,65 +85,59 @@ export default function App() {
         </div>
 
         <div className="product-grid" id="new">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {products.map((product, i) => (
+            <ProductCard key={product.id} product={product} index={i + 1} />
           ))}
         </div>
       </section>
 
-      {/* AI Stylist introduction */}
-      <section className="stylist-banner" id="stylist">
-        <div className="stylist-art">
-          <span className="art-word">NOIRÉ</span>
-          <span className="art-caption">
-            YOUR PERSONAL
-            <br />
-            EVENING STYLIST
-          </span>
+      <section className="stylist" id="stylist">
+        <p className="mono">NOIRÉ AI STYLIST</p>
+        <h2>
+          برای انتخاب لباس،
+          <br />
+          <em>تنها نمان.</em>
+        </h2>
+
+        <div className="chips" role="group" aria-label="مناسبت">
+          {occasions.map((o) => (
+            <button
+              key={o}
+              className="chip"
+              aria-pressed={occasion === o}
+              onClick={() => setOccasion(occasion === o ? null : o)}
+            >
+              {o}
+            </button>
+          ))}
         </div>
 
-        <div className="stylist-copy">
-          <p className="eyebrow">
-            <Sparkles size={14} />
-            NOIRÉ AI STYLIST
-          </p>
+        <p className="sub">
+          {occasion
+            ? `برای «${occasion}»، استایلیست هوشمند سه پیشنهاد آماده می‌کند.`
+            : "مناسبتت را انتخاب کن؛ بقیه‌اش با سلیقه، بودجه و موجودی واقعی فروشگاه هماهنگ می‌شود."}
+        </p>
 
-          <h2>
-            برای انتخاب لباس،
-            <br />
-            <em>تنها نمان.</em>
-          </h2>
-
-          <p>
-            مناسبتت را بگو، از استایلیست هوشمند NOIRÉ پیشنهاد بگیر؛ انتخاب‌هایی
-            که با سلیقه، بودجه و موجودی واقعی فروشگاه هماهنگ‌اند.
-          </p>
-
-          <button
-            className="outline-button"
-            onClick={() =>
-              alert("استایلیست هوشمند در مراحل بعدی پیاده‌سازی می‌شود.")
-            }
-          >
-            استایلیست هوشمند · به‌زودی
-            <ArrowLeft size={16} />
-          </button>
-        </div>
+        <button
+          className="outline-button"
+          onClick={() =>
+            alert("استایلیست هوشمند در مراحل بعدی پیاده‌سازی می‌شود.")
+          }
+        >
+          استایلیست هوشمند · به‌زودی
+          <ArrowLeft size={16} />
+        </button>
       </section>
 
-      {/* Newsletter */}
       <section className="newsletter">
-        <p className="eyebrow">A NOTE FROM NOIRÉ</p>
-
+        <p className="mono">A NOTE FROM NOIRÉ</p>
         <h2>
           برای خبرهای <em>خاص</em>، همراه ما باش.
         </h2>
-
         <p>کالکشن‌های تازه و انتخاب‌های ویژه، قبل از همه.</p>
-
         <form
-          onSubmit={(event) => {
-            event.preventDefault();
+          onSubmit={(e) => {
+            e.preventDefault();
             alert("ثبت ایمیل در نسخه نمایشی است.");
           }}
         >
@@ -134,7 +147,6 @@ export default function App() {
             aria-label="آدرس ایمیل"
             required
           />
-
           <button type="submit">
             عضویت
             <ArrowLeft size={15} />
@@ -142,16 +154,12 @@ export default function App() {
         </form>
       </section>
 
-      {/* Footer */}
       <footer className="footer">
-        <a className="wordmark footer-logo" href="#">
-          NOIRÉ<span>®</span>
+        <a className="footer-logo" href="#" aria-label="NOIRÉ">
+          NOIRÉ
         </a>
-
-        <p>Elegance After Dark</p>
-
         <div className="footer-bottom">
-          <span>© 2026 NOIRÉ. All rights reserved.</span>
+          <span className="mono">© 2026 NOIRÉ. All rights reserved.</span>
           <span>ساخته‌شده برای لحظه‌های خاص</span>
         </div>
       </footer>

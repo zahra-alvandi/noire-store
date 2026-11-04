@@ -1,42 +1,31 @@
-import { Heart, ArrowUpLeft } from "lucide-react";
+import { Heart } from "lucide-react";
 import type { Product } from "../types/product";
 import { formatPrice } from "../data/products";
 
 type ProductCardProps = {
   product: Product;
+  index: number;
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, index }: ProductCardProps) {
   return (
-    <article className="product-card">
-      <div className="product-image-wrap">
+    <article className="card">
+      <div className="card-num">{String(index).padStart(2, "0")}</div>
+
+      <div className="arch">
         <img src={product.image} alt={product.name} loading="lazy" />
-
-        {product.badge && (
-          <span className="product-badge">{product.badge}</span>
-        )}
-
-        <button
-          className="favorite-button"
-          aria-label="افزودن به علاقه‌مندی‌ها"
-        >
-          <Heart size={17} />
-        </button>
-
-        <button className="quick-view">
-          مشاهده محصول
-          <ArrowUpLeft size={15} />
+        {product.badge && <span className="badge">{product.badge}</span>}
+        <button className="fav" aria-label="افزودن به علاقه‌مندی‌ها">
+          <Heart size={16} />
         </button>
       </div>
 
-      <div className="product-info">
+      <div className="card-info">
         <div>
-          <p className="product-category">{product.category}</p>
-
+          <p>{product.category}</p>
           <h3>{product.name}</h3>
         </div>
-
-        <span className="product-price">{formatPrice(product.price)}</span>
+        <span className="price">{formatPrice(product.price)}</span>
       </div>
     </article>
   );
