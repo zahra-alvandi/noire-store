@@ -7,33 +7,34 @@ export const products: Product[] = [
     category: "پیراهن مجلسی",
     price: 4850000,
     image:
-      "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=900&q=85",
+      "images/dress-2.jpg",
     badge: "تازه رسیده",
+    categoryKey: "evening",
   },
   {
     id: "dress-002",
     name: "لباس ساتن آدرینا",
     category: "ساتن",
     price: 6200000,
-    image:
-      "images/dress-4.jpg",
+    image: "images/dress-4.jpg",
+    categoryKey: "satin",
   },
   {
     id: "dress-003",
     name: "پیراهن مشکی سلین",
     category: "لباس شب",
     price: 5700000,
-    image:
-      "images/dress-1.jpg",
+    image: "images/dress-1.jpg",
     badge: "پرفروش",
+    categoryKey: "evening",
   },
   {
     id: "dress-004",
     name: "پیراهن بلند رُزا",
     category: "پیراهن بلند",
     price: 7100000,
-    image:
-      "images/dress-3.jpg",
+    image: "images/dress-3.jpg",
+    categoryKey: "formal",
   },
 ];
 
