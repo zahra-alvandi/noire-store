@@ -94,7 +94,7 @@ body::after {
 }
 .nav-links {
   display: flex;
-  justify-content: space-between;
+  gap: 30px;
   font-size: 12px;
   color: var(--mute);
 }
@@ -129,7 +129,7 @@ body::after {
   position: absolute;
   top: -6px;
   inset-inline-end: -8px;
-  font-size: 9px;
+  font-size: 14px;
   color: var(--gold);
 }
 .mobile-menu {

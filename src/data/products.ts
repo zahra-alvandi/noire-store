@@ -7,7 +7,7 @@ export const products: Product[] = [
     category: "پیراهن مجلسی",
     price: 4850000,
     image:
-      "images/dress-2.jpg",
+      "/images/dress-2.jpg",
     badge: "تازه رسیده",
     categoryKey: "evening",
   },
@@ -16,7 +16,7 @@ export const products: Product[] = [
     name: "لباس ساتن آدرینا",
     category: "ساتن",
     price: 6200000,
-    image: "images/dress-4.jpg",
+    image: "/images/dress-4.jpg",
     categoryKey: "satin",
   },
   {
@@ -24,7 +24,7 @@ export const products: Product[] = [
     name: "پیراهن مشکی سلین",
     category: "لباس شب",
     price: 5700000,
-    image: "images/dress-1.jpg",
+    image: "/images/dress-1.jpg",
     badge: "پرفروش",
     categoryKey: "evening",
   },
@@ -33,7 +33,7 @@ export const products: Product[] = [
     name: "پیراهن بلند رُزا",
     category: "پیراهن بلند",
     price: 7100000,
-    image: "images/dress-3.jpg",
+    image: "/images/dress-3.jpg",
     categoryKey: "formal",
   },
 ];

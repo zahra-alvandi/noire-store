@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Heart, ShoppingBag, Minus, Plus, ArrowRight } from "lucide-react";
 import { products, formatPrice } from "../data/products";
+import { saveCart } from "../utils/cart";
 
 const sizes = [36, 38, 40, 42, 44, 46];
 
@@ -25,7 +26,7 @@ export default function ProductDetails() {
   }
 
   function addToCart() {
-    if (!selectedSize) return;
+    if (!product || !selectedSize) return;
 
     const cart = JSON.parse(localStorage.getItem("noire-cart") || "[]");
 
@@ -44,7 +45,7 @@ export default function ProductDetails() {
       });
     }
 
-    localStorage.setItem("noire-cart", JSON.stringify(cart));
+    saveCart(cart);
     setAdded(true);
   }
 
