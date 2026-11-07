@@ -3,12 +3,16 @@ import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { products, formatPrice } from "../data/products";
 import { saveCart } from "../utils/cart";
+import Header from "../components/Header";
+import { label } from "../ui/ui";
 
 type CartItem = {
   productId: string;
   size: number;
   quantity: number;
 };
+
+const qtyBtn = "grid size-9 place-items-center transition hover:text-gold";
 
 export default function Cart() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -56,136 +60,148 @@ export default function Cart() {
   );
 
   return (
-    <main className="min-h-screen bg-[#111110] text-[#f4f0e8] px-5 md:px-12 pt-32 pb-20">
-      <div className="max-w-6xl mx-auto">
-        <p className="text-xs tracking-[0.25em] text-[#c6a87c] mb-5">
-          YOUR SELECTION
-        </p>
+    <>
+      <Header />
 
-        <h1 className="text-4xl md:text-6xl font-light mb-12">سبد خرید</h1>
+      <main className="min-h-svh px-[5vw] pb-20 pt-32 md:px-[6vw]">
+        <div className="mx-auto max-w-6xl">
+          <p className={`${label} mb-5 text-gold`}>YOUR SELECTION</p>
 
-        {cartItems.length === 0 ? (
-          <div className="flex flex-col items-center text-center py-20">
-            <ShoppingBag size={36} className="text-[#c6a87c] mb-6" />
+          <h1 className="mb-12 text-4xl font-extralight md:text-6xl">
+            سبد خرید
+          </h1>
 
-            <h2 className="text-xl mb-4">سبد خرید شما خالی است</h2>
+          {cartItems.length === 0 ? (
+            <div className="flex flex-col items-center py-20 text-center">
+              <ShoppingBag
+                size={36}
+                strokeWidth={1}
+                className="mb-6 text-gold"
+              />
 
-            <p className="text-sm text-white/50 mb-8">
-              انتخابی برای درخشش پیدا کن.
-            </p>
+              <h2 className="mb-4 text-xl font-light">سبد خرید شما خالی است</h2>
 
-            <Link
-              to="/shop"
-              className="bg-[#c6a87c] text-[#111110] px-8 py-4 text-sm hover:bg-[#d5b991] transition"
-            >
-              مشاهده فروشگاه
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-12">
-            <div className="space-y-6">
-              {cartItems.map((item) => {
-                if (!item.product) return null;
+              <p className="mb-8 text-sm text-mute">
+                انتخابی برای درخشش پیدا کن.
+              </p>
 
-                return (
-                  <article
-                    key={`${item.productId}-${item.size}`}
-                    className="flex gap-5 border-b border-white/10 pb-6"
-                  >
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-28 md:w-40 aspect-[3/4] object-cover"
-                    />
+              <Link
+                to="/shop"
+                className="rounded-full bg-gold px-8 py-4 text-sm font-medium text-bg transition hover:bg-ink"
+              >
+                مشاهده فروشگاه
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_350px]">
+              <div className="space-y-6">
+                {cartItems.map((item) => {
+                  if (!item.product) return null;
 
-                    <div className="flex-1 flex flex-col">
-                      <p className="text-xs text-white/50 mb-2">
-                        {item.product.category}
-                      </p>
+                  return (
+                    <article
+                      key={`${item.productId}-${item.size}`}
+                      className="flex gap-5 border-b border-line pb-6"
+                    >
+                      <img
+                        src={item.product.image}
+                        alt={item.product.name}
+                        className="aspect-[3/4] w-28 rounded-t-full object-cover md:w-40"
+                      />
 
-                      <h2 className="text-lg mb-3">{item.product.name}</h2>
+                      <div className="flex flex-1 flex-col">
+                        <p className="mb-2 text-xs text-mute">
+                          {item.product.category}
+                        </p>
 
-                      <p className="text-sm text-white/60">سایز: {item.size}</p>
+                        <h2 className="mb-3 text-lg font-light">
+                          {item.product.name}
+                        </h2>
 
-                      <p className="text-[#c6a87c] mt-3">
-                        {formatPrice(item.product.price)}
-                      </p>
+                        <p className="text-sm text-mute">سایز: {item.size}</p>
 
-                      <div className="flex items-center justify-between mt-auto pt-5">
-                        <div className="flex items-center border border-white/15">
+                        <p className="mt-3 text-gold">
+                          {formatPrice(item.product.price)}
+                        </p>
+
+                        <div className="mt-auto flex items-center justify-between pt-5">
+                          <div className="flex items-center rounded-full border border-line">
+                            <button
+                              onClick={() =>
+                                changeQuantity(item.productId, item.size, -1)
+                              }
+                              className={qtyBtn}
+                              aria-label="کاهش تعداد"
+                            >
+                              <Minus size={14} />
+                            </button>
+
+                            <span className="w-8 text-center text-sm">
+                              {item.quantity}
+                            </span>
+
+                            <button
+                              onClick={() =>
+                                changeQuantity(item.productId, item.size, 1)
+                              }
+                              className={qtyBtn}
+                              aria-label="افزایش تعداد"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+
                           <button
                             onClick={() =>
-                              changeQuantity(item.productId, item.size, -1)
+                              removeItem(item.productId, item.size)
                             }
-                            className="p-2"
-                            aria-label="کاهش تعداد"
+                            className="text-mute transition hover:text-red-400"
+                            aria-label="حذف محصول"
                           >
-                            <Minus size={14} />
-                          </button>
-
-                          <span className="w-8 text-center text-sm">
-                            {item.quantity}
-                          </span>
-
-                          <button
-                            onClick={() =>
-                              changeQuantity(item.productId, item.size, 1)
-                            }
-                            className="p-2"
-                            aria-label="افزایش تعداد"
-                          >
-                            <Plus size={14} />
+                            <Trash2 size={17} />
                           </button>
                         </div>
-
-                        <button
-                          onClick={() => removeItem(item.productId, item.size)}
-                          className="text-white/40 hover:text-red-400 transition"
-                          aria-label="حذف محصول"
-                        >
-                          <Trash2 size={17} />
-                        </button>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
+                    </article>
+                  );
+                })}
+              </div>
+
+              <aside className="h-fit rounded-t-[40px] border border-line bg-[#141210] p-6 pt-9">
+                <h2 className="mb-6 text-lg font-light">خلاصه سفارش</h2>
+
+                <div className="mb-4 flex justify-between text-sm text-mute">
+                  <span>تعداد محصولات</span>
+                  <span>
+                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                  </span>
+                </div>
+
+                <div className="mb-6 flex justify-between gap-4 text-sm text-mute">
+                  <span>هزینه ارسال</span>
+                  <span>در مرحله بعد محاسبه می‌شود</span>
+                </div>
+
+                <div className="flex justify-between gap-4 border-t border-line pt-5">
+                  <span>مبلغ کل</span>
+                  <span className="text-gold">{formatPrice(total)}</span>
+                </div>
+
+                <button
+                  disabled
+                  className="mt-8 w-full cursor-not-allowed rounded-full bg-gold py-4 text-bg opacity-50"
+                >
+                  ادامه فرایند خرید
+                </button>
+
+                <p className="mt-4 text-center text-xs text-mute">
+                  پرداخت در مرحله بعد فعال خواهد شد.
+                </p>
+              </aside>
             </div>
-
-            <aside className="border border-white/10 p-6 h-fit">
-              <h2 className="text-lg mb-6">خلاصه سفارش</h2>
-
-              <div className="flex justify-between text-sm text-white/60 mb-4">
-                <span>تعداد محصولات</span>
-                <span>
-                  {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                </span>
-              </div>
-
-              <div className="flex justify-between text-sm text-white/60 mb-6">
-                <span>هزینه ارسال</span>
-                <span>در مرحله بعد محاسبه می‌شود</span>
-              </div>
-
-              <div className="border-t border-white/10 pt-5 flex justify-between gap-4">
-                <span>مبلغ کل</span>
-                <span className="text-[#c6a87c]">{formatPrice(total)}</span>
-              </div>
-
-              <button
-                disabled
-                className="w-full mt-8 py-4 bg-[#c6a87c] text-[#111110] opacity-50 cursor-not-allowed"
-              >
-                ادامه فرایند خرید
-              </button>
-
-              <p className="text-xs text-white/40 text-center mt-4">
-                پرداخت در مرحله بعد فعال خواهد شد.
-              </p>
-            </aside>
-          </div>
-        )}
-      </div>
-    </main>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
