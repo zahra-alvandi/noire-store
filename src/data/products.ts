@@ -6,10 +6,11 @@ export const products: Product[] = [
     name: "پیراهن شب آوین",
     category: "پیراهن مجلسی",
     price: 4850000,
-    image:
-      "/images/dress-2.jpg",
+    image: "/images/dress-2.jpg",
     badge: "تازه رسیده",
     categoryKey: "evening",
+    sizes: [36, 38, 40, 42],
+    colors: ["black", "burgundy"],
   },
   {
     id: "dress-002",
@@ -18,6 +19,8 @@ export const products: Product[] = [
     price: 6200000,
     image: "/images/dress-4.jpg",
     categoryKey: "satin",
+    sizes: [36, 38, 40, 42],
+    colors: ["black", "lavender", "lightblue"],
   },
   {
     id: "dress-003",
@@ -27,6 +30,8 @@ export const products: Product[] = [
     image: "/images/dress-1.jpg",
     badge: "پرفروش",
     categoryKey: "evening",
+    sizes: [36, 38, 40, 42],
+    colors: ["black"],
   },
   {
     id: "dress-004",
@@ -35,6 +40,8 @@ export const products: Product[] = [
     price: 7100000,
     image: "/images/dress-3.jpg",
     categoryKey: "formal",
+    sizes: [36, 38, 40, 42],
+    colors: ["black", "burgundy", "red"],
   },
 ];
 

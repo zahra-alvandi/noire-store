@@ -80,7 +80,7 @@ export default function ProductDetails() {
   }
 
   function addToCart() {
-    if (!selectedSize) return;
+    if (!product || !selectedSize) return;
 
     const cart = JSON.parse(localStorage.getItem("noire-cart") || "[]");
 
@@ -104,6 +104,8 @@ export default function ProductDetails() {
   }
 
   function handleFavorite() {
+    if (!product) return;
+
     const updatedWishlist = toggleWishlist(product.id);
 
     setFavorite(updatedWishlist.includes(product.id));
