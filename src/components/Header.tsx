@@ -105,12 +105,13 @@ export default function Header() {
             <Search size={18} />
           </button>
 
-          <button
+          <Link
+            to="/login"
             className={`${icon} hidden md:inline-flex`}
             aria-label="حساب کاربری"
           >
             <UserRound size={18} />
-          </button>
+          </Link>
 
           <Link
             to="/wishlist"
@@ -230,13 +231,14 @@ export default function Header() {
               جستجو
             </button>
 
-            <button
-              type="button"
+            <Link
+              to="/login"
+              onClick={closeMenu}
               className="flex items-center justify-center gap-2.5 rounded-full border border-line py-3 transition hover:border-gold hover:text-gold"
             >
               <UserRound size={16} />
               حساب کاربری
-            </button>
+            </Link>
           </div>
 
           <p className="mt-6 text-center font-label text-[9px] uppercase tracking-[.22em] text-mute [direction:ltr]">
