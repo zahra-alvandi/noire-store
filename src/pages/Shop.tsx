@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ArrowDownUp,
   SlidersHorizontal,
@@ -37,6 +37,7 @@ const colorOptions = [
 export default function Shop() {
   const [searchParams] = useSearchParams();
   const occasion = searchParams.get("occasion");
+  const searchParam = searchParams.get("search") ?? "";
 
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("newest");
@@ -46,6 +47,10 @@ export default function Shop() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+
+  useEffect(() => {
+    setSearch(searchParam);
+  }, [searchParam]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];

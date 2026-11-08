@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCartCount } from "../utils/cart";
 import Spotlight from "./Spotlight";
+import SearchOverlay from "./SearchOverlay";
 
 const icon = "relative inline-flex p-1 transition hover:text-gold";
 const nav = "transition hover:text-gold";
@@ -22,6 +23,7 @@ export default function Header() {
   const { pathname, hash } = useLocation();
 
   const closeMenu = () => setMenuOpen(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     const updateCount = () => setCartCount(getCartCount());
@@ -95,6 +97,8 @@ export default function Header() {
 
         <div className="hidden md:flex items-center justify-end gap-3.5 md:gap-4">
           <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
             className={`${icon} hidden md:inline-flex`}
             aria-label="جستجو"
           >
@@ -216,6 +220,10 @@ export default function Header() {
 
             <button
               type="button"
+              onClick={() => {
+                closeMenu();
+                setSearchOpen(true);
+              }}
               className="flex items-center justify-center gap-2.5 rounded-full border border-line py-3 transition hover:border-gold hover:text-gold"
             >
               <Search size={16} />
@@ -236,6 +244,8 @@ export default function Header() {
           </p>
         </aside>
       </div>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
