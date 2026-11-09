@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -20,8 +20,39 @@ const menuItems = [
 export default function Account() {
   const [activeTab, setActiveTab] = useState("profile");
 
-  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+  const { user, isAuthenticated, logout, updateProfile } = useAuth();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
+
+  const [name, setName] = useState(user?.name ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+
+  function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setProfileError("");
+    setProfileSuccess("");
+
+    try {
+      updateProfile({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim().toLowerCase(),
+      });
+
+      setIsEditing(false);
+      setProfileSuccess("اطلاعات حساب شما با موفقیت به‌روزرسانی شد.");
+    } catch (error) {
+      setProfileError(
+        error instanceof Error ? error.message : "ذخیره اطلاعات انجام نشد.",
+      );
+    }
+  }
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
@@ -126,41 +157,158 @@ export default function Account() {
           <section className="min-w-0">
             {activeTab === "profile" && (
               <div>
-                <div className="mb-10">
-                  <h2 className="text-2xl font-extralight">اطلاعات شخصی</h2>
+                <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-extralight">اطلاعات شخصی</h2>
 
-                  <p className="mt-3 text-xs text-mute">
-                    اطلاعات حساب کاربری شما
-                  </p>
+                    <p className="mt-3 text-xs text-mute">
+                      اطلاعات حساب کاربری شما
+                    </p>
+                  </div>
+
+                  {!isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setName(user.name);
+                        setPhone(user.phone);
+                        setEmail(user.email);
+                        setProfileError("");
+                        setProfileSuccess("");
+                        setIsEditing(true);
+                      }}
+                      className="border-b border-gold pb-2 text-xs text-gold transition hover:text-ink"
+                    >
+                      ویرایش اطلاعات
+                    </button>
+                  )}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {[
-                    { label: "نام و نام خانوادگی", value: user.name },
-                    { label: "شماره موبایل", value: user.phone },
-                    { label: "ایمیل", value: user.email },
-                  ].map((field) => (
-                    <div
-                      key={field.label}
-                      className="border-b border-line py-5"
-                    >
-                      <span className="text-xs text-mute">{field.label}</span>
+                {profileSuccess && (
+                  <p role="status" className="mb-6 text-xs text-green-400">
+                    {profileSuccess}
+                  </p>
+                )}
 
-                      <p className="mt-3 break-words text-sm">
-                        {field.value || "ثبت نشده"}
+                {profileError && (
+                  <p role="alert" className="mb-6 text-xs text-red-400">
+                    {profileError}
+                  </p>
+                )}
+
+                {isEditing ? (
+                  <form onSubmit={handleProfileSubmit} className="space-y-6">
+                    <div>
+                      <label
+                        htmlFor="profile-name"
+                        className="mb-2 block text-xs text-mute"
+                      >
+                        نام و نام خانوادگی
+                      </label>
+
+                      <input
+                        id="profile-name"
+                        required
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                        className="w-full border-b border-line bg-transparent px-1 py-3 text-sm outline-none transition focus:border-gold"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="profile-phone"
+                        className="mb-2 block text-xs text-mute"
+                      >
+                        شماره موبایل
+                      </label>
+
+                      <input
+                        id="profile-phone"
+                        type="tel"
+                        required
+                        dir="ltr"
+                        value={phone}
+                        onChange={(event) => setPhone(event.target.value)}
+                        className="w-full border-b border-line bg-transparent px-1 py-3 text-sm outline-none transition focus:border-gold"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="profile-email"
+                        className="mb-2 block text-xs text-mute"
+                      >
+                        ایمیل
+                      </label>
+
+                      <input
+                        id="profile-email"
+                        type="email"
+                        required
+                        dir="ltr"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        className="w-full border-b border-line bg-transparent px-1 py-3 text-sm outline-none transition focus:border-gold"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 pt-4">
+                      <button
+                        type="submit"
+                        className="rounded-full bg-gold px-8 py-3 text-xs font-medium text-bg transition hover:bg-ink"
+                      >
+                        ذخیره تغییرات
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setProfileError("");
+                          setName(user.name);
+                          setPhone(user.phone);
+                          setEmail(user.email);
+                        }}
+                        className="rounded-full border border-line px-8 py-3 text-xs text-mute transition hover:border-gold hover:text-gold"
+                      >
+                        انصراف
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {[
+                        { label: "نام و نام خانوادگی", value: user.name },
+                        { label: "شماره موبایل", value: user.phone },
+                        { label: "ایمیل", value: user.email },
+                      ].map((field) => (
+                        <div
+                          key={field.label}
+                          className="border-b border-line py-5"
+                        >
+                          <span className="text-xs text-mute">
+                            {field.label}
+                          </span>
+
+                          <p className="mt-3 break-words text-sm">
+                            {field.value || "ثبت نشده"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 border border-line/70 p-5 md:p-6">
+                      <p className="text-sm">خوش آمدید، {user.name}</p>
+
+                      <p className="mt-2 text-xs leading-7 text-mute">
+                        از حضور شما در NOIRÉ خوشحالیم. از این بخش می‌توانید
+                        اطلاعات حساب و سفارش‌های خود را مدیریت کنید.
                       </p>
                     </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 border border-line/70 p-5 md:p-6">
-                  <p className="text-sm">خوش آمدید، {user.name}</p>
-
-                  <p className="mt-2 text-xs leading-7 text-mute">
-                    از حضور شما در NOIRÉ خوشحالیم. از این بخش می‌توانید اطلاعات
-                    حساب و سفارش‌های خود را مدیریت کنید.
-                  </p>
-                </div>
+                  </>
+                )}
               </div>
             )}
 

@@ -20,6 +20,7 @@ interface AuthContextType {
   register: (data: Omit<User, "id">) => void;
   login: (email: string, password: string) => boolean;
   logout: () => void;
+  updateProfile: (data: Pick<User, "name" | "phone" | "email">) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,6 +80,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
+  const updateProfile = (data: Pick<User, "name" | "phone" | "email">) => {
+    if (!user) {
+      throw new Error("کاربر وارد حساب نشده است.");
+    }
+
+    const users: User[] = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+
+    const normalizedEmail = data.email.trim().toLowerCase();
+
+    const emailExists = users.some(
+      (item) =>
+        item.id !== user.id && item.email.toLowerCase() === normalizedEmail,
+    );
+
+    if (emailExists) {
+      throw new Error("این ایمیل قبلاً توسط کاربر دیگری ثبت شده است.");
+    }
+
+    const updatedUser: User = {
+      ...user,
+      name: data.name.trim(),
+      phone: data.phone.trim(),
+      email: normalizedEmail,
+    };
+
+    const updatedUsers = users.map((item) =>
+      item.id === user.id ? updatedUser : item,
+    );
+
+    localStorage.setItem(USERS_KEY, JSON.stringify(updatedUsers));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updatedUser));
+
+    setUser(updatedUser);
+  };
+
   const logout = () => {
     localStorage.removeItem(SESSION_KEY);
     setUser(null);
@@ -92,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         login,
         logout,
+        updateProfile,
       }}
     >
       {children}
