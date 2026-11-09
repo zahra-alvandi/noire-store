@@ -61,7 +61,7 @@ export default function Home() {
 
         <Stage
           className={`${rise} mx-auto mt-8 w-full max-w-[340px] md:mt-0 md:max-w-[460px] [animation-delay:260ms]`}
-          src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=1400&q=90"
+          src="/images/dress-1.jpg"
           alt="NOIRÉ eveningwear collection"
         />
 

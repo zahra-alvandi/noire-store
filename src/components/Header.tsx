@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getCartCount } from "../utils/cart";
 import Spotlight from "./Spotlight";
 import SearchOverlay from "./SearchOverlay";
+import { useAuth } from "../context/AuthContext";
 
 const icon = "relative inline-flex p-1 transition hover:text-gold";
 const nav = "transition hover:text-gold";
@@ -21,6 +22,9 @@ export default function Header() {
   const [cartCount, setCartCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname, hash } = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  const accountPath = isAuthenticated ? "/account" : "/login";
 
   const closeMenu = () => setMenuOpen(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -106,7 +110,7 @@ export default function Header() {
           </button>
 
           <Link
-            to="/login"
+            to={accountPath}
             className={`${icon} hidden md:inline-flex`}
             aria-label="حساب کاربری"
           >
@@ -232,12 +236,12 @@ export default function Header() {
             </button>
 
             <Link
-              to="/login"
+              to={accountPath}
               onClick={closeMenu}
               className="flex items-center justify-center gap-2.5 rounded-full border border-line py-3 transition hover:border-gold hover:text-gold"
             >
               <UserRound size={16} />
-              حساب کاربری
+              {isAuthenticated ? "حساب من" : "حساب کاربری"}
             </Link>
           </div>
 

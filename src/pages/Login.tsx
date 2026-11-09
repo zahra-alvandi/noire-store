@@ -1,17 +1,33 @@
-import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/account", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
 
-    // Temporary frontend-only behavior
-    alert("فرم ورود آماده اتصال به بک‌اند است.");
+    const success = login(email.trim().toLowerCase(), password);
+
+    if (success) {
+      navigate("/account", { replace: true });
+    } else {
+      setError("ایمیل یا رمز عبور اشتباه است.");
+    }
   }
 
   return (
@@ -103,6 +119,12 @@ export default function Login() {
               </button>
             </div>
           </div>
+
+          {error && (
+            <p role="alert" className="text-xs text-red-400">
+              {error}
+            </p>
+          )}
 
           <div className="flex justify-start">
             <Link

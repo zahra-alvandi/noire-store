@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -23,7 +26,22 @@ export default function Register() {
       return;
     }
 
-    alert("فرم ثبت‌نام آماده اتصال به بک‌اند است.");
+    try {
+      register({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      navigate("/account", { replace: true });
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "ثبت‌نام انجام نشد. دوباره تلاش کنید.",
+      );
+    }
   }
 
   return (

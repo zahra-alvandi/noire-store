@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -9,6 +9,7 @@ import {
   Package,
   UserRound,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const menuItems = [
   { id: "profile", label: "اطلاعات شخصی", icon: UserRound },
@@ -18,6 +19,18 @@ const menuItems = [
 
 export default function Account() {
   const [activeTab, setActiveTab] = useState("profile");
+
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  function handleLogout() {
+    logout();
+    navigate("/login", { replace: true });
+  }
 
   return (
     <main dir="rtl" className="min-h-screen bg-bg px-5 pb-24 pt-32 md:px-[6vw]">
@@ -52,9 +65,9 @@ export default function Account() {
                 <UserRound size={20} />
               </div>
 
-              <div>
-                <p className="text-sm">حساب کاربری</p>
-                <p className="mt-1 text-xs text-mute">به NOIRÉ خوش آمدید</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm">{user.name}</p>
+                <p className="mt-1 truncate text-xs text-mute">{user.email}</p>
               </div>
             </div>
 
@@ -98,13 +111,14 @@ export default function Account() {
             </nav>
 
             <div className="mt-8 border-t border-line pt-6">
-              <Link
-                to="/login"
-                className="flex items-center gap-3 px-4 py-3 text-xs text-mute transition hover:text-gold"
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 px-4 py-3 text-xs text-mute transition hover:text-gold"
               >
                 <LogOut size={16} />
                 خروج از حساب
-              </Link>
+              </button>
             </div>
           </aside>
 
@@ -116,30 +130,35 @@ export default function Account() {
                   <h2 className="text-2xl font-extralight">اطلاعات شخصی</h2>
 
                   <p className="mt-3 text-xs text-mute">
-                    اطلاعات حساب شما در این بخش نمایش داده می‌شود.
+                    اطلاعات حساب کاربری شما
                   </p>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {["نام و نام خانوادگی", "شماره موبایل", "ایمیل"].map(
-                    (field) => (
-                      <div key={field} className="border-b border-line py-5">
-                        <span className="text-xs text-mute">{field}</span>
+                  {[
+                    { label: "نام و نام خانوادگی", value: user.name },
+                    { label: "شماره موبایل", value: user.phone },
+                    { label: "ایمیل", value: user.email },
+                  ].map((field) => (
+                    <div
+                      key={field.label}
+                      className="border-b border-line py-5"
+                    >
+                      <span className="text-xs text-mute">{field.label}</span>
 
-                        <p className="mt-3 text-sm text-mute/50">
-                          پس از ورود نمایش داده می‌شود
-                        </p>
-                      </div>
-                    ),
-                  )}
+                      <p className="mt-3 break-words text-sm">
+                        {field.value || "ثبت نشده"}
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="mt-8 border border-line/70 p-5 md:p-6">
-                  <p className="text-sm">اطلاعات حساب شما</p>
+                  <p className="text-sm">خوش آمدید، {user.name}</p>
 
                   <p className="mt-2 text-xs leading-7 text-mute">
-                    پس از ورود به حساب کاربری، اطلاعات شخصی شما در این قسمت
-                    نمایش داده خواهد شد.
+                    از حضور شما در NOIRÉ خوشحالیم. از این بخش می‌توانید اطلاعات
+                    حساب و سفارش‌های خود را مدیریت کنید.
                   </p>
                 </div>
               </div>
@@ -183,8 +202,7 @@ export default function Account() {
                   </p>
 
                   <p className="mt-3 max-w-xs text-xs leading-7 text-mute">
-                    آدرس‌های ارسال شما در آینده از این قسمت قابل مدیریت خواهند
-                    بود.
+                    آدرس‌های ارسال شما در این بخش قابل مدیریت خواهند بود.
                   </p>
                 </div>
               </div>
