@@ -11,6 +11,7 @@ export const products: Product[] = [
     categoryKey: "evening",
     sizes: [36, 38, 40, 42],
     colors: ["black", "burgundy"],
+    styleTags: ["classic", "delicate"],
   },
   {
     id: "dress-002",
@@ -21,6 +22,7 @@ export const products: Product[] = [
     categoryKey: "satin",
     sizes: [36, 38, 40, 42],
     colors: ["black", "lavender", "lightblue"],
+    styleTags: ["minimal", "delicate"],
   },
   {
     id: "dress-003",
@@ -32,6 +34,7 @@ export const products: Product[] = [
     categoryKey: "evening",
     sizes: [36, 38, 40, 42],
     colors: ["black"],
+    styleTags: ["classic", "bold"],
   },
   {
     id: "dress-004",
@@ -42,6 +45,7 @@ export const products: Product[] = [
     categoryKey: "formal",
     sizes: [36, 38, 40, 42],
     colors: ["black", "burgundy", "red"],
+    styleTags: ["classic", "bold"],
   },
 ];
 

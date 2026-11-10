@@ -15,7 +15,7 @@ const navLinks = [
   { to: "/shop", label: "فروشگاه" },
   { to: "/shop", label: "تازه‌ترین‌ها" },
   { to: "/shop", label: "کالکشن" },
-  { to: "/#stylist", label: "استایلیست هوشمند" },
+  { to: "/stylist", label: "استایلیست هوشمند" },
 ];
 
 export default function Header() {

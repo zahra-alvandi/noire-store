@@ -5,6 +5,7 @@ import ProductCard from "../components/ProductCard";
 import Stage from "../components/Stage";
 import { products } from "../data/products";
 import { h2, label, linkLine, pill, productGrid } from "../ui/ui";
+import { Link } from "react-router-dom";
 
 const occasions = ["عروسی", "مهمانی شب", "کوکتل", "شام رسمی"];
 
@@ -306,16 +307,10 @@ export default function Home() {
               : "مناسبتت را انتخاب کن؛ بقیه‌اش با سلیقه، بودجه و موجودی واقعی فروشگاه هماهنگ می‌شود."}
           </p>
 
-          <button
-            type="button"
-            className={pill}
-            onClick={() =>
-              alert("استایلیست هوشمند در مراحل بعدی پیاده‌سازی می‌شود.")
-            }
-          >
-            استایلیست هوشمند · به‌زودی
+          <Link to="/stylist" className={pill}>
+            استایلیست هوشمند
             <ArrowLeft size={16} />
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -395,9 +390,9 @@ export default function Home() {
               درباره ما
             </a>
 
-            <a className={footLink} href="/#stylist">
+            <Link className={footLink} to="/stylist">
               استایلیست هوشمند
-            </a>
+            </Link>
           </div>
 
           <div className="flex flex-col items-start gap-4">

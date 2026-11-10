@@ -6,8 +6,8 @@ export type Product = {
   price: number;
   image: string;
   badge?: string;
-
   sizes?: number[];
+  sizeStock?: Record<number, number>;
   colors?: string[];
+  styleTags?: string[];
 };
-  

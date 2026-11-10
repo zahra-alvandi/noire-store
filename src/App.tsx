@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
 import ForgotPassword from "./pages/ForgotPassword";
+import Stylist from "./pages/Stylist";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/account" element={<Account />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/stylist" element={<Stylist />} />
       </Routes>
     </>
   );
