@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 
 import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
 import { products } from "../data/products";
+import { occasionCategories } from "../utils/occasions";
+import { label, productGrid } from "../ui/ui";
 
 const questions = [
   {
@@ -64,136 +66,135 @@ const questions = [
   },
 ];
 
-const occasionCategories: Record<string, string[]> = {
-  wedding: ["formal", "satin"],
-  party: ["evening", "satin"],
-  formal: ["formal"],
-};
+type Product = (typeof products)[number];
+
+const lightColors = ["ivory", "lavender", "lightblue"];
+
+// One rule per question. Used for BOTH exact results and the "closest matches" fallback.
+const matchers: ((p: Product, value: string) => boolean)[] = [
+  (p, v) =>
+    v === "special" || (occasionCategories[v]?.includes(p.categoryKey) ?? true),
+  (p, v) =>
+    v === "light"
+      ? !!p.colors?.some((c) => lightColors.includes(c))
+      : !!p.colors?.includes(v),
+  (p, v) => !!p.styleTags?.includes(v),
+  (p, v) =>
+    v === "5000000"
+      ? p.price <= 5000000
+      : v === "7000000"
+        ? p.price > 5000000 && p.price <= 7000000
+        : p.price > 7000000,
+  // only sizes that are actually in stock
+  (p, v) => (p.sizeStock?.[Number(v)] ?? 0) > 0,
+];
+
+/* ---- Keep progress when the user opens a product and comes back ---- */
+const STORAGE_KEY = "noire-stylist";
+
+type Saved = { answers: string[]; step: number; showResults: boolean };
+
+function loadSaved(): Saved {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "");
+
+    if (Array.isArray(saved.answers)) {
+      return {
+        answers: saved.answers.map((a: unknown) =>
+          typeof a === "string" ? a : "",
+        ),
+        step: Math.min(
+          Math.max(0, Number(saved.step) || 0),
+          questions.length - 1,
+        ),
+        showResults: !!saved.showResults,
+      };
+    }
+  } catch {
+    /* nothing saved yet */
+  }
+
+  return { answers: [], step: 0, showResults: false };
+}
+
+// Coming from the home page chips (/stylist?occasion=wedding) pre-answers question 1
+function getInitialState(occasion: string | null): Saved {
+  if (occasion && questions[0].options.some((o) => o.value === occasion)) {
+    return { answers: [occasion], step: 1, showResults: false };
+  }
+
+  return loadSaved();
+}
 
 export default function Stylist() {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [showResults, setShowResults] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [initial] = useState(() =>
+    getInitialState(searchParams.get("occasion")),
+  );
+
+  const [step, setStep] = useState(initial.step);
+  const [answers, setAnswers] = useState<string[]>(initial.answers);
+  const [showResults, setShowResults] = useState(initial.showResults);
   const [isEditingAnswer, setIsEditingAnswer] = useState(false);
   const [sortOrder, setSortOrder] = useState("default");
 
   const currentQuestion = questions[step];
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
+  useEffect(() => {
+    if (searchParams.has("occasion")) setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
-    const occasion = answers[0];
-    const color = answers[1];
-    const budget = answers[3];
-    const size = answers[4];
+  useEffect(() => {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ answers, step, showResults }),
+    );
+  }, [answers, step, showResults]);
 
-    if (occasion && occasion !== "special") {
-      const categories = occasionCategories[occasion];
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [showResults]);
 
-      if (categories) {
-        result = result.filter((product) =>
-          categories.includes(product.categoryKey),
-        );
-      }
-    }
+  // Questions that actually narrow things down ("any" and "special occasion" don't)
+  const activeIndexes = useMemo(
+    () =>
+      questions
+        .map((_, i) => i)
+        .filter(
+          (i) =>
+            answers[i] &&
+            answers[i] !== "any" &&
+            !(i === 0 && answers[i] === "special"),
+        ),
+    [answers],
+  );
 
-    if (color && color !== "any") {
-      if (color === "light") {
-        result = result.filter((product) =>
-          product.colors?.some((item) =>
-            ["ivory", "lavender", "lightblue"].includes(item),
-          ),
-        );
-      } else {
-        result = result.filter((product) => product.colors?.includes(color));
-      }
-    }
+  const scored = useMemo(
+    () =>
+      products.map((product) => ({
+        product,
+        score: activeIndexes.filter((i) => matchers[i](product, answers[i]))
+          .length,
+      })),
+    [answers, activeIndexes],
+  );
 
-    const style = answers[2];
+  const total = activeIndexes.length;
 
-    if (style && style !== "any") {
-      result = result.filter((product) => product.styleTags?.includes(style));
-    }
+  const filteredProducts = useMemo(
+    () =>
+      scored.filter((item) => item.score === total).map((item) => item.product),
+    [scored, total],
+  );
 
-    if (budget && budget !== "any") {
-      const maxBudget = Number(budget);
-
-      if (budget === "5000000") {
-        result = result.filter((product) => product.price <= maxBudget);
-      } else if (budget === "7000000") {
-        result = result.filter(
-          (product) => product.price > 5000000 && product.price <= maxBudget,
-        );
-      } else {
-        result = result.filter((product) => product.price > 7000000);
-      }
-    }
-
-    if (size && size !== "any") {
-      result = result.filter((product) =>
-        product.sizes?.includes(Number(size)),
-      );
-    }
-
-    return result;
-  }, [answers]);
-
-  const fallbackProducts = useMemo(() => {
-    const occasion = answers[0];
-    const color = answers[1];
-    const style = answers[2];
-    const budget = answers[3];
-    const size = answers[4];
-
-    const occasionMatches =
-      occasion && occasion !== "special"
-        ? products.filter((product) =>
-            occasionCategories[occasion]?.includes(product.categoryKey),
-          )
-        : [...products];
-
-    const candidates = occasionMatches.length ? occasionMatches : [...products];
-
-    function getScore(product: (typeof products)[number]) {
-      let score = 0;
-
-      if (color && color !== "any") {
-        const matchesColor =
-          color === "light"
-            ? product.colors?.some((item) =>
-                ["ivory", "lavender", "lightblue"].includes(item),
-              )
-            : product.colors?.includes(color);
-
-        if (matchesColor) score += 3;
-      }
-
-      if (style && style !== "any" && product.styleTags?.includes(style)) {
-        score += 3;
-      }
-
-      if (budget && budget !== "any") {
-        const priceMatches =
-          budget === "5000000"
-            ? product.price <= 5000000
-            : budget === "7000000"
-              ? product.price > 5000000 && product.price <= 7000000
-              : product.price > 7000000;
-
-        if (priceMatches) score += 2;
-      }
-
-      if (size && size !== "any" && product.sizes?.includes(Number(size))) {
-        score += 2;
-      }
-
-      return score;
-    }
-
-    return [...candidates]
-      .sort((a, b) => getScore(b) - getScore(a))
-      .slice(0, 4);
-  }, [answers]);
+  const fallbackProducts = useMemo(
+    () =>
+      scored
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 4),
+    [scored],
+  );
 
   const sortedProducts = useMemo(() => {
     const result = [...filteredProducts];
@@ -222,11 +223,18 @@ export default function Stylist() {
   }
 
   function nextStep() {
+    setIsEditingAnswer(false);
+
     if (step === questions.length - 1) {
       setShowResults(true);
     } else {
       setStep((current) => current + 1);
     }
+  }
+
+  function previousStep() {
+    setIsEditingAnswer(false);
+    setStep((current) => current - 1);
   }
 
   function resetStylist() {
@@ -243,9 +251,9 @@ export default function Stylist() {
 
       <main
         dir="rtl"
-        className="min-h-svh px-4 pb-20 pt-28 sm:px-6 md:px-[8vw] md:pt-36"
+        className="min-h-svh px-4 pb-20 pt-28 sm:px-6 md:px-[6vw] md:pt-36"
       >
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-6xl">
           <Link
             to="/shop"
             className="inline-flex items-center gap-2 text-xs text-mute transition hover:text-gold"
@@ -255,7 +263,9 @@ export default function Stylist() {
           </Link>
 
           <section className="py-12 text-center sm:py-16">
-            <span className="inline-flex items-center gap-2 text-xs tracking-widest text-gold">
+            <span
+              className={`${label} inline-flex items-center gap-2 text-gold`}
+            >
               <Sparkles size={14} />
               NOIRÉ PERSONAL STYLIST
             </span>
@@ -273,8 +283,8 @@ export default function Stylist() {
           </section>
 
           {!showResults ? (
-            <section className="mx-auto max-w-xl">
-              <div className="mb-8 flex items-center justify-between text-xs text-mute">
+            <section className="mx-auto max-w-xl rounded-t-[56px] border border-line bg-[#141210] px-5 pb-8 pt-10 sm:px-10 sm:pt-12">
+              <div className="mb-6 flex items-center justify-between text-xs text-mute">
                 <span>
                   مرحله {step + 1} از {questions.length}
                 </span>
@@ -289,17 +299,25 @@ export default function Stylist() {
                 </button>
               </div>
 
-              <div className="mb-10 h-px bg-line">
+              <div
+                role="progressbar"
+                aria-label="پیشرفت"
+                aria-valuemin={1}
+                aria-valuemax={questions.length}
+                aria-valuenow={step + 1}
+                className="mb-10 h-px bg-line"
+              >
                 <div
                   className="h-px bg-gold transition-all duration-500"
-                  style={{
-                    width: `${((step + 1) / questions.length) * 100}%`,
-                  }}
+                  style={{ width: `${((step + 1) / questions.length) * 100}%` }}
                 />
               </div>
 
               <div className="mb-8 text-center">
-                <h2 className="text-xl font-light sm:text-2xl">
+                <h2
+                  id="question-title"
+                  className="text-xl font-light sm:text-2xl"
+                >
                   {currentQuestion.title}
                 </h2>
 
@@ -308,7 +326,11 @@ export default function Stylist() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div
+                role="radiogroup"
+                aria-labelledby="question-title"
+                className="grid grid-cols-2 gap-3"
+              >
                 {currentQuestion.options.map((option) => {
                   const selected = answers[step] === option.value;
 
@@ -316,13 +338,10 @@ export default function Stylist() {
                     <button
                       key={option.value}
                       type="button"
-                      aria-pressed={selected}
+                      role="radio"
+                      aria-checked={selected}
                       onClick={() => selectOption(option.value)}
-                      className={`min-h-16 border px-4 py-4 text-sm transition ${
-                        selected
-                          ? "border-gold bg-gold/10 text-gold"
-                          : "border-line text-ink hover:border-gold/60"
-                      }`}
+                      className="min-h-14 rounded-full border border-line px-4 py-3.5 text-sm transition last:odd:col-span-2 hover:border-gold/60 aria-checked:border-gold aria-checked:bg-gold aria-checked:text-bg"
                     >
                       {option.label}
                     </button>
@@ -334,7 +353,7 @@ export default function Stylist() {
                 <button
                   type="button"
                   disabled={step === 0}
-                  onClick={() => setStep((current) => current - 1)}
+                  onClick={previousStep}
                   className="inline-flex items-center gap-2 text-xs text-mute transition hover:text-gold disabled:opacity-30"
                 >
                   <ArrowRight size={14} />
@@ -345,7 +364,7 @@ export default function Stylist() {
                   type="button"
                   disabled={!answers[step]}
                   onClick={nextStep}
-                  className="inline-flex items-center gap-3 bg-gold px-6 py-3.5 text-xs text-bg transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center gap-3 rounded-full bg-gold px-7 py-3.5 text-xs font-medium text-bg transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {step === questions.length - 1
                     ? "مشاهده پیشنهادها"
@@ -358,7 +377,7 @@ export default function Stylist() {
           ) : (
             <section>
               <div className="mb-10 text-center">
-                <span className="text-xs tracking-widest text-gold">
+                <span className={`${label} text-gold`}>
                   YOUR PERSONAL SELECTION
                 </span>
 
@@ -372,7 +391,7 @@ export default function Stylist() {
               </div>
 
               {filteredProducts.length > 0 && (
-                <div className="mb-6 flex items-center justify-between gap-4">
+                <div className="mb-8 flex items-center justify-between gap-4">
                   <span className="text-xs text-mute">
                     {filteredProducts.length} محصول پیدا شد
                   </span>
@@ -397,7 +416,7 @@ export default function Stylist() {
               )}
 
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3">
+                <div className={productGrid}>
                   {sortedProducts.map((product, index) => (
                     <ProductCard
                       key={product.id}
@@ -416,30 +435,29 @@ export default function Stylist() {
                     </h3>
 
                     <p className="mt-3 text-sm leading-8 text-mute">
-                      اما این مدل‌ها به سلیقه‌ات نزدیک هستن. شاید یکی از این
-                      انتخاب‌ها رو دوست داشته باشی.
+                      {fallbackProducts.length > 0
+                        ? "اما این مدل‌ها بخشی از پاسخ‌هات رو دارن. شاید یکی از این انتخاب‌ها رو دوست داشته باشی."
+                        : "فعلاً محصولی که با پاسخ‌هات هماهنگ باشه نداریم. می‌تونی یکی از جواب‌ها رو تغییر بدی."}
                     </p>
                   </div>
 
-                  {fallbackProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3">
-                      {fallbackProducts.map((product, index) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          index={index + 1}
-                        />
+                  {fallbackProducts.length > 0 && (
+                    <div className={productGrid}>
+                      {fallbackProducts.map(({ product, score }, index) => (
+                        <div key={product.id}>
+                          <ProductCard product={product} index={index + 1} />
+
+                          <p className="mt-2 text-[11px] text-gold">
+                            هماهنگ با {score} از {total} پاسخ
+                          </p>
+                        </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="py-8 text-center text-sm text-mute">
-                      فعلاً محصولی برای پیشنهاد وجود نداره.
-                    </p>
                   )}
                 </div>
               )}
 
-              <div className="mt-12">
+              <div className="mt-16">
                 <div className="mb-5 text-center">
                   <h3 className="text-sm font-light">پاسخ‌های شما</h3>
                   <p className="mt-2 text-xs text-mute">
@@ -473,7 +491,7 @@ export default function Stylist() {
                             setIsEditingAnswer(true);
                             setShowResults(false);
                           }}
-                          className="shrink-0 text-xs text-gold transition hover:text-ink"
+                          className="shrink-0 rounded-full border border-gold/50 px-4 py-1.5 text-xs text-gold transition hover:bg-gold hover:text-bg"
                         >
                           ویرایش
                         </button>

@@ -187,15 +187,15 @@ export default function Cart() {
                   <span className="text-gold">{formatPrice(total)}</span>
                 </div>
 
-                <button
-                  disabled
-                  className="mt-8 w-full cursor-not-allowed rounded-full bg-gold py-4 text-bg opacity-50"
+                <Link
+                  to="/checkout"
+                  className="mt-8 flex w-full items-center justify-center rounded-full bg-gold py-4 text-sm font-medium text-bg transition hover:bg-ink"
                 >
                   ادامه فرایند خرید
-                </button>
+                </Link>
 
                 <p className="mt-4 text-center text-xs text-mute">
-                  پرداخت در مرحله بعد فعال خواهد شد.
+                  هزینه ارسال در مرحله بعد محاسبه می‌شود.
                 </p>
               </aside>
             </div>

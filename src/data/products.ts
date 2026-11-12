@@ -12,6 +12,12 @@ export const products: Product[] = [
     sizes: [36, 38, 40, 42],
     colors: ["black", "burgundy"],
     styleTags: ["classic", "delicate"],
+    sizeStock: {
+      36: 2,
+      38: 0,
+      40: 3,
+      42: 1,
+    },
   },
   {
     id: "dress-002",
@@ -23,6 +29,12 @@ export const products: Product[] = [
     sizes: [36, 38, 40, 42],
     colors: ["black", "lavender", "lightblue"],
     styleTags: ["minimal", "delicate"],
+    sizeStock: {
+      36: 0,
+      38: 2,
+      40: 1,
+      42: 0,
+    },
   },
   {
     id: "dress-003",
@@ -35,6 +47,12 @@ export const products: Product[] = [
     sizes: [36, 38, 40, 42],
     colors: ["black"],
     styleTags: ["classic", "bold"],
+    sizeStock: {
+      36: 1,
+      38: 2,
+      40: 0,
+      42: 2,
+    },
   },
   {
     id: "dress-004",
@@ -46,6 +64,12 @@ export const products: Product[] = [
     sizes: [36, 38, 40, 42],
     colors: ["black", "burgundy", "red"],
     styleTags: ["classic", "bold"],
+    sizeStock: {
+      36: 3,
+      38: 1,
+      40: 2,
+      42: 0,
+    },
   },
 ];
 

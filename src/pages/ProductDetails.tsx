@@ -8,8 +8,6 @@ import { isFavorite, toggleWishlist } from "../utils/wishlist";
 import Header from "../components/Header";
 import { label } from "../ui/ui";
 
-const sizes = [36, 38, 40, 42, 44, 46];
-
 const sizeTable = [
   { size: 36, bust: 84, waist: 66, hip: 92 },
   { size: 38, bust: 88, waist: 70, hip: 96 },
@@ -29,9 +27,16 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [cartError, setCartError] = useState("");
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+
+  const availableSizes = product?.sizes ?? [];
+
+  const selectedStock = selectedSize
+    ? (product?.sizeStock?.[selectedSize] ?? 0)
+    : 0;
 
   const galleryImages = product
     ? [
@@ -47,6 +52,7 @@ export default function ProductDetails() {
     setSelectedSize(null);
     setQuantity(1);
     setAdded(false);
+    setCartError("");
   }, [product?.id, product?.image]);
 
   useEffect(() => {
@@ -80,7 +86,19 @@ export default function ProductDetails() {
   }
 
   function addToCart() {
-    if (!product || !selectedSize) return;
+    if (!product) return;
+
+    if (!selectedSize) {
+      setCartError("لطفاً ابتدا سایز موردنظر را انتخاب کنید.");
+      return;
+    }
+
+    const stock = product.sizeStock?.[selectedSize] ?? 0;
+
+    if (stock <= 0) {
+      setCartError("این سایز در حال حاضر موجود نیست.");
+      return;
+    }
 
     const cart = JSON.parse(localStorage.getItem("noire-cart") || "[]");
 
@@ -88,6 +106,20 @@ export default function ProductDetails() {
       (item: { productId: string; size: number }) =>
         item.productId === product.id && item.size === selectedSize,
     );
+
+    const currentQuantity = existingItem?.quantity ?? 0;
+
+    if (currentQuantity + quantity > stock) {
+      const remaining = Math.max(0, stock - currentQuantity);
+
+      setCartError(
+        remaining > 0
+          ? `فقط ${remaining} عدد دیگر از این سایز قابل سفارش است.`
+          : "تمام موجودی این سایز در سبد خرید شما قرار دارد.",
+      );
+
+      return;
+    }
 
     if (existingItem) {
       existingItem.quantity += quantity;
@@ -100,6 +132,7 @@ export default function ProductDetails() {
     }
 
     saveCart(cart);
+    setCartError("");
     setAdded(true);
   }
 
@@ -154,22 +187,48 @@ export default function ProductDetails() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-6 gap-2">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    aria-pressed={selectedSize === size}
-                    onClick={() => {
-                      setSelectedSize(size);
-                      setAdded(false);
-                    }}
-                    className="h-[46px] rounded-b-sm rounded-t-full border border-line text-sm transition hover:border-gold aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-bg md:h-14"
-                  >
-                    {size}
-                  </button>
-                ))}
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                {availableSizes.map((size) => {
+                  const stock = product.sizeStock?.[size] ?? 0;
+                  const isAvailable = stock > 0;
+
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      disabled={!isAvailable}
+                      aria-pressed={selectedSize === size}
+                      onClick={() => {
+                        setSelectedSize(size);
+                        setQuantity(1);
+                        setAdded(false);
+                        setCartError("");
+                      }}
+                      className="relative flex h-[50px] flex-col items-center justify-center rounded-b-sm rounded-t-full border border-line text-sm transition hover:border-gold aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-bg disabled:cursor-not-allowed disabled:opacity-35 md:h-[54px]"
+                    >
+                      <span>{size}</span>
+
+                      {!isAvailable && (
+                        <span className="text-[9px] text-mute">ناموجود</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+
+              {availableSizes.length === 0 && (
+                <p className="mt-3 text-xs text-mute">
+                  سایزی برای این محصول تعریف نشده است.
+                </p>
+              )}
+
+              {selectedSize && (
+                <p className="mt-4 text-xs text-mute" aria-live="polite">
+                  {selectedStock > 0
+                    ? `موجودی این سایز: ${selectedStock} عدد`
+                    : "این سایز موجود نیست."}
+                </p>
+              )}
             </div>
 
             {/* Quantity and cart */}
@@ -183,8 +242,9 @@ export default function ProductDetails() {
                 >
                   <button
                     type="button"
+                    disabled={quantity <= 1}
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="grid h-full w-10 place-items-center transition hover:text-gold"
+                    className="grid h-full w-10 place-items-center transition hover:text-gold disabled:cursor-not-allowed disabled:opacity-30"
                     aria-label="کاهش تعداد"
                   >
                     <Minus size={14} />
@@ -196,8 +256,11 @@ export default function ProductDetails() {
 
                   <button
                     type="button"
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="grid h-full w-10 place-items-center transition hover:text-gold"
+                    disabled={!selectedSize || quantity >= selectedStock}
+                    onClick={() =>
+                      setQuantity((q) => Math.min(selectedStock, q + 1))
+                    }
+                    className="grid h-full w-10 place-items-center transition hover:text-gold disabled:cursor-not-allowed disabled:opacity-30"
                     aria-label="افزایش تعداد"
                   >
                     <Plus size={14} />
@@ -208,7 +271,11 @@ export default function ProductDetails() {
                 <button
                   type="button"
                   onClick={addToCart}
-                  disabled={!selectedSize}
+                  disabled={
+                    !selectedSize ||
+                    selectedStock <= 0 ||
+                    quantity > selectedStock
+                  }
                   className={`${round} flex min-w-0 flex-1 items-center justify-center gap-2.5 rounded-full border border-gold bg-gold text-sm font-medium text-bg transition enabled:hover:border-ink enabled:hover:bg-ink disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-mute`}
                 >
                   <ShoppingBag size={17} />
@@ -244,6 +311,8 @@ export default function ProductDetails() {
                 className="mt-2.5 min-h-5 text-sm text-gold"
               >
                 {added && "محصول با موفقیت به سبد خرید اضافه شد."}
+
+                {cartError && <span className="text-red-400">{cartError}</span>}
               </p>
             </div>
 

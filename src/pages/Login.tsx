@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,11 +11,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const location = useLocation();
+  const redirectTo =
+    (location.state as { from?: string } | null)?.from ?? "/account";
+
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/account", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectTo]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,7 +28,7 @@ export default function Login() {
     const success = login(email.trim().toLowerCase(), password);
 
     if (success) {
-      navigate("/account", { replace: true });
+      navigate(redirectTo, { replace: true });
     } else {
       setError("ایمیل یا رمز عبور اشتباه است.");
     }

@@ -10,6 +10,8 @@ import Register from "./pages/Register";
 import Account from "./pages/Account";
 import ForgotPassword from "./pages/ForgotPassword";
 import Stylist from "./pages/Stylist";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/Ordersuccess";
 
 export default function App() {
   return (
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/account" element={<Account />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/stylist" element={<Stylist />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="order-success/:id" element={<OrderSuccess />} />
       </Routes>
     </>
   );
