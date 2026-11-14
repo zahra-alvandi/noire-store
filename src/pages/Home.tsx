@@ -23,9 +23,6 @@ const occasionText =
 const occasionLink =
   "inline-flex items-center gap-2.5 text-[11px] text-gold transition-all group-hover:gap-4";
 
-const footLink = "text-[11px] text-mute transition hover:text-gold";
-const footTitle = "mb-2 text-xs font-normal";
-
 export default function Home() {
   const [occasion, setOccasion] = useState<string | null>(null);
 
