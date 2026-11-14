@@ -16,7 +16,7 @@ import Header from "../components/Header";
 import { products, formatPrice } from "../data/products";
 import { provinces } from "../data/provinces";
 import { getCart, saveCart } from "../utils/cart";
-import { useCheckoutUser } from "../utils/checkoutuser";
+import { useCheckoutUser } from "../utils/checkoutUser";
 import {
   createOrderId,
   normalizeAddress,
