@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Heart, ShoppingBag, Minus, Plus, ArrowRight, X } from "lucide-react";
 
-import { products, formatPrice } from "../data/products";
+import { products, formatPrice, isOneSize, ONE_SIZE } from "../data/products";
 import { saveCart } from "../utils/cart";
 import { isFavorite, toggleWishlist } from "../utils/wishlist";
 import Header from "../components/Header";
+import CompleteTheLook from "../components/CompleteTheLook";
 import { label } from "../ui/ui";
 
 const sizeTable = [
@@ -34,22 +35,28 @@ export default function ProductDetails() {
 
   const availableSizes = product?.sizes ?? [];
 
+  // Accessories come in one size: it is selected automatically
+  const oneSize = product ? isOneSize(product) : false;
+
   const selectedStock = selectedSize
     ? (product?.sizeStock?.[selectedSize] ?? 0)
     : 0;
 
+  // Thumbnails: other products of the same kind (dress with dresses, etc.)
   const galleryImages = product
     ? [
         product.image,
         ...products
-          .filter((item) => item.id !== product.id)
+          .filter(
+            (item) => item.id !== product.id && item.type === product.type,
+          )
           .map((item) => item.image),
       ].slice(0, 4)
     : [];
 
   useEffect(() => {
     setSelectedImage(product?.image ?? "");
-    setSelectedSize(null);
+    setSelectedSize(product && isOneSize(product) ? ONE_SIZE : null);
     setQuantity(1);
     setAdded(false);
     setCartError("");
@@ -175,58 +182,76 @@ export default function ProductDetails() {
 
             {/* Size selection */}
             <div className="border-t border-line pt-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm">انتخاب سایز</h2>
+              {oneSize ? (
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm">سایز</h2>
 
-                <button
-                  type="button"
-                  onClick={() => setSizeGuideOpen(true)}
-                  className="text-xs text-mute underline underline-offset-4 transition hover:text-gold"
-                >
-                  راهنمای سایز
-                </button>
-              </div>
+                  <span className="rounded-full border border-gold px-4 py-1.5 text-xs text-gold">
+                    یک‌سایز
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-sm">انتخاب سایز</h2>
 
-              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-                {availableSizes.map((size) => {
-                  const stock = product.sizeStock?.[size] ?? 0;
-                  const isAvailable = stock > 0;
-
-                  return (
                     <button
-                      key={size}
                       type="button"
-                      disabled={!isAvailable}
-                      aria-pressed={selectedSize === size}
-                      onClick={() => {
-                        setSelectedSize(size);
-                        setQuantity(1);
-                        setAdded(false);
-                        setCartError("");
-                      }}
-                      className="relative flex h-[50px] flex-col items-center justify-center rounded-b-sm rounded-t-full border border-line text-sm transition hover:border-gold aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-bg disabled:cursor-not-allowed disabled:opacity-35 md:h-[54px]"
+                      onClick={() => setSizeGuideOpen(true)}
+                      className="text-xs text-mute underline underline-offset-4 transition hover:text-gold"
                     >
-                      <span>{size}</span>
-
-                      {!isAvailable && (
-                        <span className="text-[9px] text-mute">ناموجود</span>
-                      )}
+                      راهنمای سایز
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
 
-              {availableSizes.length === 0 && (
-                <p className="mt-3 text-xs text-mute">
-                  سایزی برای این محصول تعریف نشده است.
-                </p>
+                  <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                    {availableSizes.map((size) => {
+                      const stock = product.sizeStock?.[size] ?? 0;
+                      const isAvailable = stock > 0;
+
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          disabled={!isAvailable}
+                          aria-pressed={selectedSize === size}
+                          onClick={() => {
+                            setSelectedSize(size);
+                            setQuantity(1);
+                            setAdded(false);
+                            setCartError("");
+                          }}
+                          className="relative flex h-[50px] flex-col items-center justify-center rounded-b-sm rounded-t-full border border-line text-sm transition hover:border-gold aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-bg disabled:cursor-not-allowed disabled:opacity-35 md:h-[54px]"
+                        >
+                          <span>{size}</span>
+
+                          {!isAvailable && (
+                            <span className="text-[9px] text-mute">
+                              ناموجود
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {availableSizes.length === 0 && (
+                    <p className="mt-3 text-xs text-mute">
+                      سایزی برای این محصول تعریف نشده است.
+                    </p>
+                  )}
+                </>
               )}
 
               {selectedSize && (
                 <p className="mt-4 text-xs text-mute" aria-live="polite">
                   {selectedStock > 0
-                    ? `موجودی این سایز: ${selectedStock} عدد`
-                    : "این سایز موجود نیست."}
+                    ? oneSize
+                      ? `موجودی: ${selectedStock} عدد`
+                      : `موجودی این سایز: ${selectedStock} عدد`
+                    : oneSize
+                      ? "این محصول فعلاً موجود نیست."
+                      : "این سایز موجود نیست."}
                 </p>
               )}
             </div>
@@ -280,9 +305,11 @@ export default function ProductDetails() {
                 >
                   <ShoppingBag size={17} />
 
-                  {selectedSize
-                    ? "افزودن به سبد خرید"
-                    : "ابتدا سایز را انتخاب کنید"}
+                  {!selectedSize
+                    ? "ابتدا سایز را انتخاب کنید"
+                    : selectedStock <= 0
+                      ? "ناموجود"
+                      : "افزودن به سبد خرید"}
                 </button>
 
                 {/* Wishlist */}
@@ -372,6 +399,9 @@ export default function ProductDetails() {
             )}
           </div>
         </div>
+
+        {/* Complete the look */}
+        <CompleteTheLook product={product} />
       </main>
 
       {/* Size Guide Modal */}

@@ -8,21 +8,23 @@ import {
 } from "lucide-react";
 import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
-import { products } from "../data/products";
+import { products, productTypes, categoriesByType } from "../data/products";
+import type { ProductType } from "../types/product";
 import { useSearchParams } from "react-router-dom";
+import { occasionCategories } from "../utils/occasions";
 import { label, productGrid } from "../ui/ui";
 
-const categories = [
-  { label: "همه محصولات", value: "all" },
-  { label: "لباس شب", value: "evening" },
-  { label: "ساتن", value: "satin" },
-  { label: "لباس مجلسی", value: "formal" },
+type TypeFilter = "all" | ProductType;
+
+const typeTabs: { value: TypeFilter; label: string }[] = [
+  { value: "all", label: "همه" },
+  ...productTypes.map((type) => ({ value: type.value, label: type.label })),
 ];
 
-const occasionCategories: Record<string, string[]> = {
-  wedding: ["formal", "satin"],
-  party: ["evening", "satin"],
-  formal: ["formal"],
+const occasionLabels: Record<string, string> = {
+  wedding: "مراسم و عروسی",
+  party: "مهمانی شبانه",
+  formal: "استایل رسمی",
 };
 
 const sizes = [36, 38, 40, 42, 44, 46];
@@ -32,12 +34,18 @@ const colorOptions = [
   { label: "عاجی", value: "ivory", color: "#e9dfcc" },
   { label: "زرشکی", value: "burgundy", color: "#702b3b" },
   { label: "طلایی", value: "gold", color: "#c8a97a" },
+  { label: "نقره‌ای", value: "silver", color: "#b9bcc0" },
 ];
 
 export default function Shop() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const occasion = searchParams.get("occasion");
   const searchParam = searchParams.get("search") ?? "";
+  const typeParam = searchParams.get("type");
+
+  // The product group lives in the URL (?type=...) so links and Back work
+  const type = (productTypes.find((t) => t.value === typeParam)?.value ??
+    "all") as TypeFilter;
 
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("newest");
@@ -52,11 +60,29 @@ export default function Shop() {
     setSearch(searchParam);
   }, [searchParam]);
 
+  // Sub-categories follow the chosen group (all groups when "all")
+  const categoryOptions =
+    type === "all"
+      ? Object.values(categoriesByType).flat()
+      : categoriesByType[type];
+
+  const activeCategory = categoryOptions.some((item) => item.value === category)
+    ? category
+    : "all";
+
+  const showSizeFilter = type === "all" || type === "dress";
+
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    if (category !== "all") {
-      result = result.filter((product) => product.categoryKey === category);
+    if (type !== "all") {
+      result = result.filter((product) => product.type === type);
+    }
+
+    if (activeCategory !== "all") {
+      result = result.filter(
+        (product) => product.categoryKey === activeCategory,
+      );
     }
 
     if (occasion && occasionCategories[occasion]) {
@@ -103,7 +129,8 @@ export default function Shop() {
 
     return result;
   }, [
-    category,
+    type,
+    activeCategory,
     occasion,
     search,
     selectedSizes,
@@ -118,6 +145,27 @@ export default function Shop() {
     selectedColors.length +
     Number(minPrice !== "") +
     Number(maxPrice !== "");
+
+  const currentHint = productTypes.find((item) => item.value === type)?.hint;
+
+  function selectType(value: TypeFilter) {
+    const next = new URLSearchParams(searchParams);
+
+    if (value === "all") next.delete("type");
+    else next.set("type", value);
+
+    setSearchParams(next, { replace: true });
+    setCategory("all");
+
+    // sizes only apply to dresses
+    if (value !== "all" && value !== "dress") setSelectedSizes([]);
+  }
+
+  function clearOccasion() {
+    const next = new URLSearchParams(searchParams);
+    next.delete("occasion");
+    setSearchParams(next, { replace: true });
+  }
 
   function toggleSize(size: number) {
     setSelectedSizes((current) =>
@@ -143,14 +191,16 @@ export default function Shop() {
     setMinPrice("");
     setMaxPrice("");
     setSort("newest");
+    setSearchParams({}, { replace: true });
   }
 
-  function FilterContent() {
-    return (
-      <div className="flex flex-col gap-8">
-        {/* Sizes */}
+  // A plain element (not an inner component), so inputs keep focus while typing
+  const filterContent = (
+    <div className="flex flex-col gap-8">
+      {/* Sizes (dresses only) */}
+      {showSizeFilter && (
         <section>
-          <h3 className="mb-4 text-sm">سایز</h3>
+          <h3 className="mb-4 text-sm">سایز لباس</h3>
 
           <div className="grid grid-cols-3 gap-2">
             {sizes.map((size) => (
@@ -166,73 +216,73 @@ export default function Shop() {
             ))}
           </div>
         </section>
+      )}
 
-        {/* Colors */}
-        <section>
-          <h3 className="mb-4 text-sm">رنگ</h3>
+      {/* Colors */}
+      <section>
+        <h3 className="mb-4 text-sm">رنگ</h3>
 
-          <div className="flex flex-wrap gap-3">
-            {colorOptions.map((color) => (
-              <button
-                key={color.value}
-                type="button"
-                onClick={() => toggleColor(color.value)}
-                aria-label={color.label}
-                aria-pressed={selectedColors.includes(color.value)}
-                title={color.label}
-                className={`grid size-9 place-items-center rounded-full border transition ${
-                  selectedColors.includes(color.value)
-                    ? "border-gold ring-2 ring-gold/30"
-                    : "border-line"
-                }`}
-              >
-                <span
-                  className="size-6 rounded-full border border-black/10"
-                  style={{ backgroundColor: color.color }}
-                />
-              </button>
-            ))}
-          </div>
-        </section>
+        <div className="flex flex-wrap gap-3">
+          {colorOptions.map((color) => (
+            <button
+              key={color.value}
+              type="button"
+              onClick={() => toggleColor(color.value)}
+              aria-label={color.label}
+              aria-pressed={selectedColors.includes(color.value)}
+              title={color.label}
+              className={`grid size-9 place-items-center rounded-full border transition ${
+                selectedColors.includes(color.value)
+                  ? "border-gold ring-2 ring-gold/30"
+                  : "border-line"
+              }`}
+            >
+              <span
+                className="size-6 rounded-full border border-black/10"
+                style={{ backgroundColor: color.color }}
+              />
+            </button>
+          ))}
+        </div>
+      </section>
 
-        {/* Price */}
-        <section>
-          <h3 className="mb-4 text-sm">محدوده قیمت (تومان)</h3>
+      {/* Price */}
+      <section>
+        <h3 className="mb-4 text-sm">محدوده قیمت (تومان)</h3>
 
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="number"
-              min="0"
-              value={minPrice}
-              onChange={(event) => setMinPrice(event.target.value)}
-              placeholder="از قیمت"
-              aria-label="حداقل قیمت"
-              className="min-w-0 rounded-full border border-line bg-transparent px-4 py-3 text-xs outline-none transition focus:border-gold"
-            />
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="number"
+            min="0"
+            value={minPrice}
+            onChange={(event) => setMinPrice(event.target.value)}
+            placeholder="از قیمت"
+            aria-label="حداقل قیمت"
+            className="min-w-0 rounded-full border border-line bg-transparent px-4 py-3 text-xs outline-none transition focus:border-gold"
+          />
 
-            <input
-              type="number"
-              min="0"
-              value={maxPrice}
-              onChange={(event) => setMaxPrice(event.target.value)}
-              placeholder="تا قیمت"
-              aria-label="حداکثر قیمت"
-              className="min-w-0 rounded-full border border-line bg-transparent px-4 py-3 text-xs outline-none transition focus:border-gold"
-            />
-          </div>
-        </section>
+          <input
+            type="number"
+            min="0"
+            value={maxPrice}
+            onChange={(event) => setMaxPrice(event.target.value)}
+            placeholder="تا قیمت"
+            aria-label="حداکثر قیمت"
+            className="min-w-0 rounded-full border border-line bg-transparent px-4 py-3 text-xs outline-none transition focus:border-gold"
+          />
+        </div>
+      </section>
 
-        <button
-          type="button"
-          onClick={resetFilters}
-          className="inline-flex items-center justify-center gap-2 border-b border-line pb-2 text-xs text-mute transition hover:border-gold hover:text-gold"
-        >
-          <RotateCcw size={13} />
-          پاک‌کردن فیلترها
-        </button>
-      </div>
-    );
-  }
+      <button
+        type="button"
+        onClick={resetFilters}
+        className="inline-flex items-center justify-center gap-2 border-b border-line pb-2 text-xs text-mute transition hover:border-gold hover:text-gold"
+      >
+        <RotateCcw size={13} />
+        پاک‌کردن فیلترها
+      </button>
+    </div>
+  );
 
   return (
     <>
@@ -240,7 +290,7 @@ export default function Shop() {
 
       <main className="min-h-svh px-4 pb-20 pt-24 sm:px-6 md:px-[6vw] md:pb-24 md:pt-36">
         {/* Heading */}
-        <section className="pb-10 pt-5 text-center sm:pb-14 md:pb-20">
+        <section className="pb-10 pt-5 text-center sm:pb-14 md:pb-16">
           <span className={label}>THE NOIRÉ COLLECTION</span>
 
           <h1 className="my-5 text-[clamp(36px,7vw,80px)] font-extralight leading-[1.6]">
@@ -249,8 +299,43 @@ export default function Shop() {
             <em>برای ماندن در خاطر.</em>
           </h1>
 
-          <p className="text-xs text-mute">کالکشن لباس‌های شب و مجلسی NOIRÉ</p>
+          <p className="text-xs text-mute">
+            لباس، اکسسوری و هر آنچه یک شب را کامل می‌کند.
+          </p>
         </section>
+
+        {/* Product group */}
+        <div
+          role="tablist"
+          aria-label="نوع محصول"
+          className="-mx-1 flex gap-7 overflow-x-auto border-b border-line px-1 sm:gap-10"
+        >
+          {typeTabs.map((tab) => {
+            const count =
+              tab.value === "all"
+                ? products.length
+                : products.filter((product) => product.type === tab.value)
+                    .length;
+
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={type === tab.value}
+                onClick={() => selectType(tab.value)}
+                className="-mb-px shrink-0 border-b border-transparent pb-4 text-base font-extralight text-mute transition hover:text-ink aria-selected:border-gold aria-selected:text-ink md:text-xl"
+              >
+                {tab.label}
+                <span className="ms-2 text-[11px] text-mute">
+                  {count.toLocaleString("fa-IR")}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="min-h-5 pb-5 pt-3 text-xs text-mute">{currentHint}</p>
 
         {/* Search */}
         <div className="mb-6 flex items-center gap-3 border-b border-line pb-3">
@@ -260,7 +345,7 @@ export default function Shop() {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="جست‌وجوی لباس..."
+            placeholder="جست‌وجوی لباس و اکسسوری..."
             aria-label="جست‌وجوی محصولات"
             className="w-full bg-transparent text-sm outline-none placeholder:text-mute/70"
           />
@@ -277,20 +362,22 @@ export default function Shop() {
           )}
         </div>
 
-        {/* Category and sorting */}
+        {/* Sub-category and sorting */}
         <section className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-center md:justify-between">
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-            {categories.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                aria-pressed={category === item.value}
-                onClick={() => setCategory(item.value)}
-                className="shrink-0 rounded-full border border-line px-4 py-2.5 text-xs text-mute transition hover:border-gold aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-bg sm:px-5"
-              >
-                {item.label}
-              </button>
-            ))}
+            {[{ label: "همه", value: "all" }, ...categoryOptions].map(
+              (item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  aria-pressed={activeCategory === item.value}
+                  onClick={() => setCategory(item.value)}
+                  className="shrink-0 rounded-full border border-line px-4 py-2.5 text-xs text-mute transition hover:border-gold aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-bg sm:px-5"
+                >
+                  {item.label}
+                </button>
+              ),
+            )}
           </div>
 
           <label className="flex shrink-0 items-center gap-2.5 text-mute">
@@ -315,6 +402,20 @@ export default function Shop() {
           </label>
         </section>
 
+        {/* Active occasion filter (from the home page cards) */}
+        {occasion && occasionLabels[occasion] && (
+          <div className="pt-4">
+            <button
+              type="button"
+              onClick={clearOccasion}
+              className="inline-flex items-center gap-2 rounded-full border border-gold px-4 py-2 text-xs text-gold transition hover:bg-gold hover:text-bg"
+            >
+              مناسبت: {occasionLabels[occasion]}
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
         {/* Product count and mobile filter */}
         <div className="flex items-center justify-between py-5 text-[11px] text-mute">
           <span>{filteredProducts.length} محصول</span>
@@ -336,8 +437,8 @@ export default function Shop() {
 
         {/* Desktop layout */}
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[190px_minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
-          <aside className="hidden md:block md:sticky md:top-24">
-            <FilterContent />
+          <aside className="hidden md:sticky md:top-24 md:block">
+            {filterContent}
           </aside>
 
           <section className="min-w-0">
@@ -397,7 +498,7 @@ export default function Shop() {
               </button>
             </div>
 
-            <FilterContent />
+            {filterContent}
 
             <button
               type="button"

@@ -4,7 +4,8 @@ import { ArrowLeft, ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 
 import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
-import { products } from "../data/products";
+import { type Product } from "../types/product";
+import { products as allProducts } from "../data/products";
 import { occasionCategories } from "../utils/occasions";
 import { label, productGrid } from "../ui/ui";
 
@@ -66,11 +67,10 @@ const questions = [
   },
 ];
 
-type Product = (typeof products)[number];
+const products = allProducts.filter((p) => p.type === "dress");
 
 const lightColors = ["ivory", "lavender", "lightblue"];
 
-// One rule per question. Used for BOTH exact results and the "closest matches" fallback.
 const matchers: ((p: Product, value: string) => boolean)[] = [
   (p, v) =>
     v === "special" || (occasionCategories[v]?.includes(p.categoryKey) ?? true),

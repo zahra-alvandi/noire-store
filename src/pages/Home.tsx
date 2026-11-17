@@ -7,6 +7,7 @@ import { products } from "../data/products";
 import { h2, label, linkLine, pill, productGrid } from "../ui/ui";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import AccessorySection from "../components/AccessorySection";
 
 const occasions = ["عروسی", "مهمانی شب", "کوکتل", "شام رسمی"];
 
@@ -209,11 +210,15 @@ export default function Home() {
         </div>
 
         <div id="new" className={productGrid}>
-          {products.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i + 1} />
-          ))}
+          {products
+            .filter((p) => p.type === "dress")
+            .map((product, i) => (
+              <ProductCard key={product.id} product={product} index={i + 1} />
+            ))}
         </div>
       </section>
+
+      <AccessorySection />
 
       {/* Brand Story */}
       <section
